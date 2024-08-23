@@ -7,54 +7,76 @@ import (
 
 func TestFindHashPositions(t *testing.T) {
 	tests := []struct {
-		xpos, ypos      float64
-		ewidth          int
-		eheight         int
-		gridWidth       int
-		gridHeight      int
-		rows            int
-		columns         int
-		expectedSquares []Square
-		expectedError   error
+		xpos, ypos            float64
+		charWidth, charHeight float64
+		gridWidth, gridHeight int
+		xaxis                 int
+		yaxis                 int
+		expectedSquares       []Square
+		expectedError         error
 	}{
 		// Test case 1: Add test case scenarios here
 		{
-			xpos:       110,
-			ypos:       110,
-			ewidth:     150,
-			eheight:    150,
+			xpos:       50,
+			ypos:       50,
+			charWidth:  20,
+			charHeight: 20,
 			gridWidth:  500,
 			gridHeight: 500,
-			rows:       5,
-			columns:    5,
+			xaxis:      5,
+			yaxis:      5,
 			expectedSquares: []Square{
-				{row: 1, col: 1},
-				{row: 1, col: 2},
-				{row: 2, col: 1},
-				{row: 2, col: 2},
+				{xcoord: 0, ycoord: 0},
 			},
 			expectedError: nil,
 		},
-
 		{
-			xpos:       201,
-			ypos:       201,
-			ewidth:     98,
-			eheight:    98,
+			xpos:       99,
+			ypos:       99,
+			charWidth:  20,
+			charHeight: 20,
 			gridWidth:  500,
 			gridHeight: 500,
-			rows:       5,
-			columns:    5,
+			xaxis:      5,
+			yaxis:      5,
 			expectedSquares: []Square{
-				{row: 2, col: 2},
+				{xcoord: 0, ycoord: 0},
+				{xcoord: 0, ycoord: 1},
+				{xcoord: 1, ycoord: 0},
+				{xcoord: 1, ycoord: 1},
 			},
 			expectedError: nil,
 		},
-		// Test case 2: Add more test case scenarios here
+		{
+			xpos:       -5,
+			ypos:       150,
+			charWidth:  20,
+			charHeight: 20,
+			gridWidth:  500,
+			gridHeight: 500,
+			xaxis:      5,
+			yaxis:      5,
+			expectedSquares: []Square{
+				{xcoord: 0, ycoord: 1},
+			},
+			expectedError: nil,
+		},
+		{
+			xpos:            0,
+			ypos:            -50,
+			charWidth:       20,
+			charHeight:      20,
+			gridWidth:       500,
+			gridHeight:      500,
+			xaxis:           5,
+			yaxis:           5,
+			expectedSquares: []Square{},
+			expectedError:   nil,
+		},
 	}
 
 	for _, test := range tests {
-		squares, err := findHashPositions(test.xpos, test.ypos, test.ewidth, test.eheight, test.gridWidth, test.gridHeight, test.rows, test.columns)
+		squares, err := findHashPositions(test.xpos, test.ypos, test.charWidth, test.charHeight, test.gridWidth, test.gridHeight, test.xaxis, test.yaxis)
 
 		if err != test.expectedError {
 			t.Errorf("For (%f, %f), expected error '%v' but got '%v'", test.xpos, test.ypos, test.expectedError, err)
