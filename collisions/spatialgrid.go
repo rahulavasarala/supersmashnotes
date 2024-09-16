@@ -42,6 +42,28 @@ type Character interface {
 	//add the logic for set hitstun later, for now just role with this
 }
 
+type StateCharacter interface {
+	Step()
+	GetPos() (float64, float64)
+	SetPos(ypos float64, xpos float64)
+	IsPurged() bool
+	GetBoundingBox() (float64, float64)
+	GetType() string
+	GetVel() (float64, float64)
+	SetVel(xv float64, yv float64)
+	GetHurtbox() []HurtBox
+	GetHitbox() []HitBox
+	GetEcb() (float64, float64)
+	GetId() string
+	GetState() string
+	SetState(newState string)
+	GetBounds() (float64, float64)
+	SetBounds(bound1 float64, bound2 float64)
+	GetGrounded() bool
+	SetGrounded(val bool)
+	//add the logic for set hitstun later, for now just role with this
+}
+
 type HurtBox struct {
 	xpos   float64
 	ypos   float64

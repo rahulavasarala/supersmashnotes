@@ -1,5 +1,7 @@
 package statemachinery
 
+import "log"
+
 type StateMachine struct {
 	currState string
 	currFrame int
@@ -7,30 +9,35 @@ type StateMachine struct {
 	states map[string]State
 }
 
-func (s *StateMachine) init(states map[string]State) {
-	s.currState = "idle"
+func (s *StateMachine) Init(states map[string]State) {
+	s.currState = "freefall"
 	s.currFrame = 0
 	s.states = states
 }
 
-func (s *StateMachine) tick(control string) {
-	//stay in the same state if you cannot cancel into anything, if you can
-	//cancel into something, change to it, if on the last frame and nothing else to do, loop back to the loopstate
+func (s *StateMachine) obtainStateChangeInfo(control string) (StringProperty, bool) {
+	stateChange, exists := s.states[s.currState].controlToState[control]
+	return stateChange, exists
+}
 
-	//implement the code to see whether character should cancel to another state
+//The tick function of the state machine uses info on the current frame, and the input provided
+//to change the current state or not
 
-	windowList, exists := s.states[s.currState].controlToState[control]
+func (s *StateMachine) Tick(control string) {
+	stateChange, exists := s.obtainStateChangeInfo(control)
 
 	if exists {
-		for _, window := range windowList {
-			if window.startFrame <= s.currFrame && s.currFrame <= window.endFrame {
-				s.currState = window.stateToChange
+		for i, window := range stateChange.timeline {
+			if window.first <= s.currFrame && s.currFrame <= window.second {
+				s.currState = stateChange.values[i]
 				s.currFrame = 0
 				return
 			}
 		}
 
 	}
+
+	//basically checking for a cancellation to another state in the code above
 
 	s.currFrame++
 
@@ -40,13 +47,42 @@ func (s *StateMachine) tick(control string) {
 	}
 }
 
-//This dude has a dictionary of states, and the current state
-//I will make the initial design kind of simple
-//will make the state machine be keyed by a string and the string represents the current state
-//current state and current frame
-//Then I will be victorious
+func (s *StateMachine) GetState() string {
+	return s.currState
+}
 
-//Create a state filler later in the game, where you can just create states from .txt files
+func (s *StateMachine) SetState(newState string) {
+	_, ok := s.states[newState]
 
-//everyone's starting state is 'idle'
-//then the states get better and better
+	if !ok {
+		return
+	}
+
+	s.currState = newState
+}
+
+func (s *StateMachine) GetFrame() int {
+	return s.currFrame
+}
+
+func (s *StateMachine) SetFrame(frame int) {
+	s.currFrame = frame
+}
+
+func (s *StateMachine) GetProperties() map[string]any {
+	state := s.states[s.currState]
+
+	return state.ExtractProperties(s.currFrame)
+}
+
+func (s *StateMachine) GetPropertyByName(name string) Property {
+	state := s.states[s.currState]
+
+	property, ok := state.properties[name]
+
+	if !ok {
+		log.Fatalf("so such property by name for state %v exists", s.currState)
+	}
+
+	return property
+}

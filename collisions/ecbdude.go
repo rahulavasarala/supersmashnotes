@@ -86,7 +86,7 @@ func (s *EcbDude) InitEcbDude(xpos float64, ypos float64, ecbwidth float64, ecbh
 	s.ecbwidth = ecbwidth
 	s.ecbheight = ecbheight
 	s.id = id
-	s.terminalvel = -2
+	s.terminalvel = -1
 	s.gravity = 0.2
 	s.xvel = 0
 	s.yvel = 0

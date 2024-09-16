@@ -1,0 +1,75 @@
+states:
+- name: idle
+  end: 7
+  properties:
+    xvel: 
+      - range: 0-7
+        value: 0
+    yvel:
+      - range: 0-7
+        value: 0
+  controlToState:
+    up: 
+      - range: 0-7
+        value: js
+    left:
+      - range: 0-7
+        value: dash
+    right:
+      - range: 0-7
+        value: dash
+  loop: idle
+
+- name: freefall
+  end: 7
+  properties:
+    isGrounded:
+      - range: 0-1
+        value: false
+  controlToState:
+    up: 
+      - range: 0-7
+        value: firefox
+  loop: freefall
+
+- name: dash
+  end: 15
+  properties:
+    xvel: 
+      - range: 0-15
+        value: 0-5
+    yvel:
+      - range: 0-15
+        value: 0
+  controlToState:
+  loop: idle
+
+- name: js
+  end: 3
+  properties:
+    yvel:
+      - range: 3
+        value: 10
+  controlToState:
+  loop: freefall
+
+- name: firefox
+  end: 120
+  properties: 
+    xvel: 
+      - range: 0-60
+        value: 0
+      - range: 61-120
+        value: 0
+    yvel:
+      - range: 0-60
+        value: 0
+      - range: 61-120
+        value: 3
+  controlToState:
+  loop: freefall
+
+#systematically, let us break down the algorithm of reading the state yaml file into steps:
+#You have a first dictionary with all the states
+#let us get to the stage where we can iterate through the keys and create states with those names
+#I can make a controlless demo, I need to brainstorm what to do next

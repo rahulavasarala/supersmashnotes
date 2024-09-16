@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/rahulavasarala/supersmashnotes/collisions"
+	"github.com/rahulavasarala/supersmashnotes/statemachinery"
 )
 
 type Game struct {
@@ -85,12 +86,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	entities := g.SpatialGrid.GetEntities()
 	immovables := g.SpatialGrid.GetImmovables()
 
-	for _, ent := range entities {
+	for i, ent := range entities {
 		xpos, ypos := ent.GetPos()
 		width, height := ent.GetBoundingBox()
 		drawCharacter(screen, color.RGBA{R: 0, G: 255, B: 0, A: 255}, xpos, ypos, width, height, g.height, false)
 		if g.debugMode {
 			drawEcb(screen, color.RGBA{R: 255, G: 0, B: 0, A: 255}, xpos, ypos, width, height, 2, g.height, false)
+			var stateDudeInterface interface{} = entities[i]
+			sc, ok := stateDudeInterface.(collisions.StateCharacter)
+			if ok {
+				printAt(screen, sc.GetState(), xpos, ypos, g.height)
+			}
+
 		}
 
 	}
@@ -132,28 +139,28 @@ func main() {
 	ebiten.SetWindowTitle("Super Smash Notes")
 	game := Game{width: 500, height: 500, debugMode: true}
 	game.CollisionFinder = &collisions.EcbCollisionFinder{}
-	game.CollisionHandler = &collisions.EcbCollisionHandler{}
+	game.CollisionHandler = &collisions.StateCollisionHandler{}
 	ebiten.SetTPS(60)
 
 	//create the collision map with all of the entities
 	spatialGrid := collisions.SpatialGrid{}
 
 	characterList := []collisions.Character{}
-	ecbdudeOne := collisions.EcbDude{}
-	ecbdudeOne.InitEcbDude(265, 450, 50, 50, "wings")
-	characterList = append(characterList, &ecbdudeOne)
+	sd := collisions.StateDude{}
+
+	smBuilder := statemachinery.StateMachineBuilder{}
+
+	sm := smBuilder.Build("../statemachinery/foxschema.yaml")
+
+	sd.Init(sm, []string{"nil", "nil", "up", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left"}, "stateDude")
+	sd.SetPos(250, 300)
+	characterList = append(characterList, &sd)
 	wallList := []collisions.Thing{}
 
 	wall1 := collisions.Wall{}
-	wall1.InitWall(275, 300, 150, 20, "wall1")
-	wall2 := collisions.Wall{}
-	wall2.InitWall(100, 200, 150, 20, "wall2")
-	wall3 := collisions.Wall{}
-	wall3.InitWall(275, 100, 150, 20, "wall3")
-	wall4 := collisions.Wall{}
-	wall4.InitWall(100, 0, 150, 20, "wall4")
+	wall1.InitWall(150, 200, 200, 20, "wall1")
 
-	wallList = append(wallList, &wall1, &wall2, &wall3, &wall4)
+	wallList = append(wallList, &wall1)
 
 	spatialGrid.InitGrid(game.width, game.height, 5, 5, characterList, wallList)
 
