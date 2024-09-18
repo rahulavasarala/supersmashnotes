@@ -27,28 +27,28 @@ states:
       - range: 0-1
         value: false
   controlToState:
-    up: 
+    upspecial: 
       - range: 0-7
         value: firefox
   loop: freefall
 
 - name: dash
-  end: 15
+  end: 12
   properties:
     xvel: 
-      - range: 0-15
-        value: 0-5
+      - range: 0-12
+        value: 7
     yvel:
-      - range: 0-15
+      - range: 0-12
         value: 0
   controlToState:
   loop: idle
 
 - name: js
-  end: 3
+  end: 5
   properties:
     yvel:
-      - range: 3
+      - range: 5
         value: 10
   controlToState:
   loop: freefall
@@ -66,6 +66,7 @@ states:
         value: 0
       - range: 61-120
         value: 3
+
   controlToState:
   loop: freefall
 

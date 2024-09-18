@@ -1,6 +1,9 @@
 package collisions
 
-import "github.com/rahulavasarala/supersmashnotes/statemachinery"
+import (
+	"github.com/rahulavasarala/supersmashnotes/controllers"
+	"github.com/rahulavasarala/supersmashnotes/statemachinery"
+)
 
 //so the state dude will have thing, and character properties
 
@@ -17,18 +20,21 @@ type StateDude struct {
 	yvel        float64
 	terminalvel float64
 	gravity     float64
+	maxdrift    float64
+	airdrift    float64
+	airdrag     float64
 	id          string
 	sm          *statemachinery.StateMachine
-	controlList []string
+	controller  controllers.Controller
 	orientation int
 }
 
-func (s *StateDude) Init(sm *statemachinery.StateMachine, controlList []string, id string) {
+func (s *StateDude) Init(sm *statemachinery.StateMachine, id string, controller controllers.Controller) {
 	s.xpos = 250
 	s.ypos = 250
 	s.ecbwidth = 50
 	s.ecbheight = 50
-	s.lifeSpan = 1000
+	s.lifeSpan = 10000
 	s.isGrounded = false
 	s.xvel = 0
 	s.yvel = 0
@@ -36,9 +42,12 @@ func (s *StateDude) Init(sm *statemachinery.StateMachine, controlList []string, 
 	s.gravity = 0.2
 	s.terminalvel = -1
 	s.orientation = 1
+	s.maxdrift = 2
+	s.airdrift = 0.4
+	s.airdrag = 0.4
+	s.controller = controller
 
 	s.sm = sm
-	s.controlList = controlList
 
 }
 
@@ -54,9 +63,7 @@ func (s *StateDude) Step() {
 		return
 	}
 
-	round := 1000 - s.lifeSpan
-
-	control := s.controlList[round%len(s.controlList)]
+	control := s.controller.GetInputs()
 
 	s.sm.Tick(control)
 
@@ -66,6 +73,7 @@ func (s *StateDude) Step() {
 
 	s.applyProperties(propertyValues, control) //this will apply the isGrounded property, which is pretty important
 	s.applyGravity()
+	s.applyAerialDrift()
 	s.move()
 
 	if s.isGrounded && (s.xpos < s.xbound1 || s.xpos > s.xbound2) {
@@ -140,10 +148,14 @@ func (s *StateDude) GetBounds() (float64, float64) {
 
 func (s *StateDude) editProperties(control string) {
 	if s.GetState() == "firefox" && s.sm.GetFrame() == 61 {
+		s.sm.GetPropertyByName("xvel").Reset()
+		s.sm.GetPropertyByName("yvel").Reset()
 		if control == "left" {
-			s.sm.GetPropertyByName("xvel").Alter(61, statemachinery.NewDoublePair(-3, -3))
+			s.orientation = -1
+			s.sm.GetPropertyByName("xvel").Alter(61, statemachinery.NewDoublePair(3, 3))
 			s.sm.GetPropertyByName("yvel").Alter(61, statemachinery.NewDoublePair(0, 0))
 		} else if control == "right" {
+			s.orientation = 1
 			s.sm.GetPropertyByName("xvel").Alter(61, statemachinery.NewDoublePair(3, 3))
 			s.sm.GetPropertyByName("yvel").Alter(61, statemachinery.NewDoublePair(0, 0))
 		}
@@ -177,7 +189,7 @@ func (s *StateDude) applyProperties(properties map[string]any, control string) {
 
 func (s *StateDude) applyGravity() {
 
-	if !s.isGrounded {
+	if s.GetState() == "freefall" {
 		if s.yvel > s.terminalvel {
 			s.yvel -= s.gravity
 		}
@@ -186,6 +198,38 @@ func (s *StateDude) applyGravity() {
 			s.yvel = s.terminalvel
 		}
 	}
+}
+
+func (s *StateDude) applyAerialDrift() {
+
+	if s.GetState() == "freefall" {
+		direction := s.controller.GetDirection()
+
+		if direction == "left" {
+			s.xvel -= s.airdrift
+			if s.xvel < -1*s.maxdrift {
+				s.xvel = -1 * s.maxdrift
+			}
+		} else if direction == "right" {
+			s.xvel += s.airdrift
+			if s.xvel > s.maxdrift {
+				s.xvel = s.maxdrift
+			}
+		} else {
+			if s.xvel < 0 {
+				s.xvel += s.airdrag
+				if s.xvel > 0 {
+					s.xvel = 0
+				}
+			} else if s.xvel > 0 {
+				s.xvel -= s.airdrag
+				if s.xvel < 0 {
+					s.xvel = 0
+				}
+			}
+		}
+	}
+
 }
 
 func (s *StateDude) move() {

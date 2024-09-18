@@ -20,7 +20,6 @@ type Controller interface {
 	GetSpecial() bool
 	GetNormal() bool
 	GetShield() bool
-	Init(buttonMappingFile string) error
 }
 
 type SimpleController struct {

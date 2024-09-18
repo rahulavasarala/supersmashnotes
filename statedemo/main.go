@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/rahulavasarala/supersmashnotes/collisions"
+	"github.com/rahulavasarala/supersmashnotes/controllers"
 	"github.com/rahulavasarala/supersmashnotes/statemachinery"
 )
 
@@ -146,15 +147,17 @@ func main() {
 	spatialGrid := collisions.SpatialGrid{}
 
 	characterList := []collisions.Character{}
-	sd := collisions.StateDude{}
+	statedude := collisions.StateDude{}
 
 	smBuilder := statemachinery.StateMachineBuilder{}
 
 	sm := smBuilder.Build("../statemachinery/foxschema.yaml")
+	controller := controllers.SimpleController{}
+	controller.Init("../controllers/samplebuttonmap.yaml")
 
-	sd.Init(sm, []string{"nil", "nil", "up", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left", "left"}, "stateDude")
-	sd.SetPos(250, 300)
-	characterList = append(characterList, &sd)
+	statedude.Init(sm, "chickemonish", &controller)
+	statedude.SetPos(250, 300)
+	characterList = append(characterList, &statedude)
 	wallList := []collisions.Thing{}
 
 	wall1 := collisions.Wall{}
