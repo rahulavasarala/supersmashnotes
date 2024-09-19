@@ -1,0 +1,17 @@
+numBones: 3
+bones:
+- id: 0
+  x: 10
+  y: 15
+  width: 10
+  links:
+    - id: 1
+      angle: 0.5
+      side: "right"
+    - id: 2
+      angle: -0.5
+      side: "left"
+- id: 1
+  width: 15
+- id: 2
+  width: 15
