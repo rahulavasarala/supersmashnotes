@@ -1,17 +1,59 @@
-numBones: 3
+numBones: 10
 bones:
 - id: 0
-  x: 10
-  y: 15
-  width: 10
+  x: 200
+  y: 200
+  width: 20
   links:
     - id: 1
       angle: 0.5
       side: "right"
-    - id: 2
-      angle: -0.5
+    - id: 3
+      angle: 0.7
+      side: "right"
+    - id: 5
+      angle: 0.6
+      side: "left"
+    - id: 7
+      angle: 0.7
+      side: "left"
+    - id: 9
+      angle: 0
       side: "left"
 - id: 1
-  width: 15
+  width: 20
+  links:
+    - id: 2
+      angle: 0.5
+      side: "right"
 - id: 2
-  width: 15
+  width: 20
+- id: 3
+  width: 20
+  links:
+    - id: 4
+      angle: 0.5
+      side: "right"
+- id: 4
+  width: 20
+- id: 5
+  width: 20
+  links:
+    - id: 6
+      angle: 0.5
+      side: "left"
+- id: 6
+  width: 20
+- id: 7
+  width: 20
+  links:
+    - id: 8
+      angle: 0.5
+      side: "left"
+- id: 8
+  width: 20
+- id: 9
+  width: 30
+
+
+

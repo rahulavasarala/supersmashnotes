@@ -1,0 +1,23 @@
+xoffset:
+ - range: 0-7
+    value: 6
+yoffset:
+ - range: 0-7
+    value: 6
+baseorientation:
+  - range: 0-7
+    value: 6
+
+joints:
+  - j1: 0
+    j2: 1
+    thetas:
+      - range: 0-7
+        value: 5
+  - j1: 1
+    j2: 2
+    thetas:
+      - range: 0-7
+        value: 3
+
+#This is the animation config file, it is built like this

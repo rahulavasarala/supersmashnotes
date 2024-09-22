@@ -1,0 +1,19 @@
+xoffset: []
+yoffset: []
+baseorientation:
+- range: chick
+  value: ken
+- range: chick
+  value: ken
+- range: chick
+  value: ken
+joints:
+- j1: 1
+  j2: 2
+  thetas:
+  - range: chick
+    value: ken
+  - range: chick
+    value: ken
+  - range: chick
+    value: ken

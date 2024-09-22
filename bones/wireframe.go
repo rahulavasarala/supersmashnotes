@@ -70,22 +70,29 @@ func (s *WireFrame) InitWireFrame(boneConfig string) error {
 	}
 
 	for i := 0; i < config.NumBones; i++ {
-		bone := Bone{id: config.Bones[i].Id, xpos: config.Bones[i].X, ypos: config.Bones[i].Y, width: config.Bones[i].Width}
-
-		boneMap[i] = &bone
+		bone := NewBone(config.Bones[i].Id, config.Bones[i].X, config.Bones[i].Y, config.Bones[i].Width)
+		boneMap[i] = bone
 	}
 
 	for i := 0; i < config.NumBones; i++ {
 		for _, link := range config.Bones[i].Links {
 			if link.Side == "left" {
-				boneMap[i].leftAngles = append(boneMap[i].leftAngles, link.Angle)
+				boneMap[i].leftAngles = append(boneMap[i].leftAngles, math.Pi*link.Angle)
 				boneMap[i].lefts = append(boneMap[i].lefts, boneMap[link.Id])
+				boneMap[link.Id].rights = append(boneMap[link.Id].rights, boneMap[i])
+				boneMap[link.Id].rightAngles = append(boneMap[link.Id].rightAngles, math.Pi*link.Angle)
 			} else {
-				boneMap[i].rightAngles = append(boneMap[i].rightAngles, link.Angle)
+				boneMap[i].rightAngles = append(boneMap[i].rightAngles, math.Pi*link.Angle)
 				boneMap[i].rights = append(boneMap[i].rights, boneMap[link.Id])
+				boneMap[link.Id].leftAngles = append(boneMap[link.Id].leftAngles, math.Pi*link.Angle)
+				boneMap[link.Id].lefts = append(boneMap[link.Id].lefts, boneMap[i])
 			}
 		}
 	}
+
+	s.boneMap = boneMap
+
+	return nil
 
 }
 
@@ -93,12 +100,9 @@ func (s *WireFrame) InitWireFrame(boneConfig string) error {
 
 // The algorithm will be, start at a bone, only go forward, figure oout the current frame, go to the next frame, and do a  matrix
 
-// because the bones are double connected, we will need a visited map
-func (s *WireFrame) Draw() {
+// because the bones are double connected, we will need
 
-}
-
-func findFrames(currBone *Bone, frame *mat.Dense, frameMap map[int]*mat.Dense, visited map[int]bool) {
+func FindFrames(currBone *Bone, frame *mat.Dense, frameMap map[int]*mat.Dense, visited map[int]bool) {
 
 	//do a forward propagation for all the lefts
 
@@ -110,7 +114,7 @@ func findFrames(currBone *Bone, frame *mat.Dense, frameMap map[int]*mat.Dense, v
 			//figure out the translation vector first
 
 			x_translation := -currBone.width/2 - (currBone.lefts[i].width/2)*math.Cos(currBone.leftAngles[i])
-			y_translation := math.Sin(currBone.leftAngles[i])
+			y_translation := (currBone.lefts[i].width / 2) * math.Sin(currBone.leftAngles[i])
 
 			theta := -1 * currBone.leftAngles[i]
 
@@ -129,7 +133,7 @@ func findFrames(currBone *Bone, frame *mat.Dense, frameMap map[int]*mat.Dense, v
 
 			visited[currBone.lefts[i].id] = true
 
-			findFrames(currBone.lefts[i], newFrame, frameMap, visited)
+			FindFrames(currBone.lefts[i], newFrame, frameMap, visited)
 
 		}
 
@@ -140,10 +144,10 @@ func findFrames(currBone *Bone, frame *mat.Dense, frameMap map[int]*mat.Dense, v
 
 			//figure out the translation vector first
 
-			x_translation := currBone.width/2 + (currBone.rights[i].width/2)*math.Cos(currBone.leftAngles[i])
-			y_translation := math.Sin(currBone.leftAngles[i])
+			x_translation := currBone.width/2 + (currBone.rights[i].width/2)*math.Cos(currBone.rightAngles[i])
+			y_translation := (currBone.rights[i].width / 2) * math.Sin(currBone.rightAngles[i])
 
-			theta := currBone.leftAngles[i]
+			theta := currBone.rightAngles[i]
 
 			fullRotationMatrix := []float64{
 				math.Cos(theta), -1 * math.Sin(theta), x_translation,
@@ -160,10 +164,152 @@ func findFrames(currBone *Bone, frame *mat.Dense, frameMap map[int]*mat.Dense, v
 
 			visited[currBone.rights[i].id] = true
 
-			findFrames(currBone.rights[i], newFrame, frameMap, visited)
+			FindFrames(currBone.rights[i], newFrame, frameMap, visited)
 
 		}
 
+	}
+
+	//Now take the frames in the frame map and centralize them with the perspective of the map so that they can be drawn
+
+}
+
+func (s *WireFrame) FindGlobalBoneFrames(originBone *Bone) map[int]*mat.Dense {
+	frameMap := map[int]*mat.Dense{}
+
+	if originBone == nil {
+		return frameMap
+	}
+
+	theta := originBone.orientation * math.Pi //value between 0 and 2 pi
+	x_translation := originBone.x
+	y_translation := originBone.y
+
+	firstFrameRotationMatrix := []float64{
+		math.Cos(theta), -1 * math.Sin(theta), x_translation,
+		math.Sin(theta), math.Cos(theta), y_translation,
+		0, 0, 1,
+	}
+
+	firstRotation := mat.NewDense(3, 3, firstFrameRotationMatrix)
+
+	frame := mat.NewDense(3, 3, []float64{
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1,
+	})
+
+	frameMap[originBone.id] = frame
+
+	visited := map[int]bool{}
+
+	FindFrames(originBone, frame, frameMap, visited)
+
+	for key := range frameMap {
+		transformed := new(mat.Dense)
+		transformed.Mul(firstRotation, frameMap[key])
+
+		frameMap[key] = transformed
+	}
+
+	return frameMap
+
+}
+
+func (s *WireFrame) GetBone(id int) *Bone {
+	val, ok := s.boneMap[id]
+
+	if !ok {
+		return nil
+	}
+
+	return val
+}
+
+func (s *WireFrame) SetOrientationOfBone(bone int, orientation float64) {
+	val, ok := s.boneMap[bone]
+
+	if !ok {
+		return
+	}
+
+	val.orientation = orientation
+}
+
+func (s *WireFrame) ChangeAngleBetweenBones(bone1 int, bone2 int, newAngle float64) {
+	b1, ok := s.boneMap[bone1]
+
+	if !ok {
+		return
+	}
+
+	b2, ok2 := s.boneMap[bone2]
+
+	if !ok2 {
+		return
+	}
+
+	//check if the bones are connected
+
+	val, side := b1.GetLink(bone2)
+
+	if val == nil {
+		return
+	}
+
+	if side == "left" {
+		b2.ChangeAngle(bone1, newAngle*math.Pi, "right")
+		b1.ChangeAngle(bone2, newAngle*math.Pi, "left")
+	} else if side == "right" {
+		b2.ChangeAngle(bone1, newAngle*math.Pi, "left")
+		b1.ChangeAngle(bone2, newAngle*math.Pi, "right")
+	}
+
+}
+
+func (s *WireFrame) ApplyAnimation(anim Animation, frame int, x float64, y float64) {
+
+	orientationInterface := anim.baseOrientation.Read(frame)
+
+	orientation, ok := orientationInterface.(float64)
+
+	if !ok {
+		return
+	}
+
+	xOffsetInterface := anim.xOffset.Read(frame)
+
+	xOffset, ok := xOffsetInterface.(float64)
+
+	if !ok {
+		return
+	}
+
+	yOffsetInterface := anim.yOffset.Read(frame)
+
+	yOffset, ok := yOffsetInterface.(float64)
+
+	if !ok {
+		return
+	}
+
+	s.boneMap[0].orientation = orientation
+	s.boneMap[0].x = x + xOffset
+	s.boneMap[0].y = y + yOffset
+
+	for _, jointProperty := range anim.jointPropertyList {
+		b1 := jointProperty.j1
+		b2 := jointProperty.j2
+
+		thetaInterface := jointProperty.thetaProperty.Read(frame)
+
+		theta, ok := thetaInterface.(float64)
+
+		if !ok {
+			return
+		}
+
+		s.ChangeAngleBetweenBones(b1, b2, theta)
 	}
 
 }

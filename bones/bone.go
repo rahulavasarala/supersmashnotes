@@ -27,15 +27,91 @@ package bones
 
 type Bone struct {
 	id    int
-	xpos  float64
-	ypos  float64
+	x     float64
+	y     float64
 	width float64
 
-	angle float64 //this is the angle in radians, from 0-2pi that will determine the orientation
+	orientation float64
 
 	lefts      []*Bone
 	leftAngles []float64
 
 	rights      []*Bone //if the left and right bones are equal to nil, then ignore the angles
 	rightAngles []float64
+}
+
+func (s *Bone) InitBone(id int, x float64, y float64, width float64) {
+	s.id = id
+	s.x = x
+	s.y = y
+	s.width = width
+	s.lefts = []*Bone{}
+	s.leftAngles = []float64{}
+	s.rights = []*Bone{}
+	s.rightAngles = []float64{}
+}
+
+func NewBone(id int, x float64, y float64, width float64) *Bone {
+	newBone := Bone{}
+	newBone.InitBone(id, x, y, width)
+
+	return &newBone
+}
+
+func (s *Bone) GetWidth() float64 {
+	return s.width
+}
+
+func (s *Bone) GetId() int {
+	return s.id
+}
+
+func (s *Bone) SetOrientation(or float64) {
+	s.orientation = or
+}
+
+// assumption is that the same bone cannot be connected to both left and right of the same bone
+func (s *Bone) GetLink(id int) (*Bone, string) {
+	if s.rights != nil {
+		for i := 0; i < len(s.rights); i++ {
+			if s.rights[i].id == id {
+				return s.rights[i], "right"
+			}
+		}
+	}
+
+	if s.lefts != nil {
+		for i := 0; i < len(s.lefts); i++ {
+			if s.lefts[i].id == id {
+				return s.lefts[i], "left"
+			}
+		}
+	}
+
+	return nil, ""
+
+}
+
+func (s *Bone) SetPosition(x float64, y float64) {
+	s.x = x
+	s.y = y
+}
+
+func (s *Bone) ChangeAngle(bone2 int, newAngle float64, side string) {
+
+	if side == "left" {
+		for i := 0; i < len(s.leftAngles); i++ {
+			if s.lefts[i].id == bone2 {
+				s.leftAngles[i] = newAngle
+				break
+			}
+		}
+	} else if side == "right" {
+		for i := 0; i < len(s.rightAngles); i++ {
+			if s.rights[i].id == bone2 {
+				s.rightAngles[i] = newAngle
+				break
+			}
+		}
+	}
 }
