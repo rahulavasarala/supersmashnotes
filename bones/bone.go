@@ -1,5 +1,7 @@
 package bones
 
+import "github.com/rahulavasarala/supersmashnotes/collisions"
+
 //hurtboxes and hitboxes will be included in the bones package
 //bones will support task control for animations and integrate the task control into the statemachine config files through timelines
 
@@ -32,6 +34,7 @@ type Bone struct {
 	width float64
 
 	orientation float64
+	hurtbox     collisions.HurtBox
 
 	lefts      []*Bone
 	leftAngles []float64
@@ -40,7 +43,7 @@ type Bone struct {
 	rightAngles []float64
 }
 
-func (s *Bone) InitBone(id int, x float64, y float64, width float64) {
+func (s *Bone) InitBone(id int, x float64, y float64, width float64, thickness float64) {
 	s.id = id
 	s.x = x
 	s.y = y
@@ -49,11 +52,13 @@ func (s *Bone) InitBone(id int, x float64, y float64, width float64) {
 	s.leftAngles = []float64{}
 	s.rights = []*Bone{}
 	s.rightAngles = []float64{}
+	s.hurtbox = collisions.HurtBox{}
+	s.hurtbox.Init(width, thickness)
 }
 
-func NewBone(id int, x float64, y float64, width float64) *Bone {
+func NewBone(id int, x float64, y float64, width float64, thickness float64) *Bone {
 	newBone := Bone{}
-	newBone.InitBone(id, x, y, width)
+	newBone.InitBone(id, x, y, width, thickness)
 
 	return &newBone
 }
@@ -64,6 +69,10 @@ func (s *Bone) GetWidth() float64 {
 
 func (s *Bone) GetId() int {
 	return s.id
+}
+
+func (s *Bone) GetHurtBox() collisions.HurtBox {
+	return s.hurtbox
 }
 
 func (s *Bone) SetOrientation(or float64) {

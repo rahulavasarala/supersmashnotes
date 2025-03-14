@@ -119,7 +119,7 @@ func ParseIntRange(window string) IntPair { //make this support negative integer
 		log.Fatalf("ParseIntRange: could not convert range string to int")
 	}
 
-	if second < first {
+	if secondInt < firstInt {
 		log.Fatalf("ParseIntRange: invalid range inputted in yaml")
 	}
 

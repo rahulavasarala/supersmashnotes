@@ -62,19 +62,6 @@ func (s *Game) InitAnimator(jointAngleConfig string, maxSaves int, debugMode boo
 
 }
 
-// func (g *Game) Update() error {
-// 	g.iteration++
-
-// 	if g.iteration > 100 {
-// 		g.iteration = 0
-// 	}
-// 	g.wireframe.SetOrientationOfBone(0, float64(g.iteration)/50)
-// 	g.wireframe.ChangeAngleBetweenBones(0, 1, float64(g.iteration)/50)
-// 	g.wireframe.ChangeAngleBetweenBones(1, 2, float64(g.iteration)/50)
-
-// 	return nil
-// }
-
 func (g *Game) pollJointAngleConfig() *JointAngleConfig {
 	data, err := os.ReadFile(g.jointAngleConfig)
 	if err != nil {
@@ -221,28 +208,17 @@ func (g *Game) WriteAnimationConfigFile() {
 
 }
 
-// func (g *Game) Draw(screen *ebiten.Image) {
-// 	screen.Fill(color.White)
-
-// 	frameMap := g.wireframe.FindGlobalBoneFrames(g.wireframe.GetBone(0))
-
-// 	for key := range frameMap {
-// 		bone := g.wireframe.GetBone(key)
-
-// 		graphics.DrawBone(screen, color.Black, 2, 500, false, true, bone, frameMap[key])
-// 	}
-
-// }
-
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.White)
 
 	frameMap := g.wireframe.FindGlobalBoneFrames(g.wireframe.GetBone(0))
 
+	graphics.Draw(screen, color.RGBA{0, 255, 0, 70}, 0, 0, 500, 154, 500, false)
+
 	for key := range frameMap {
 		bone := g.wireframe.GetBone(key)
 
-		graphics.DrawBone(screen, color.Black, 2, 500, false, true, bone, frameMap[key])
+		graphics.DrawBone(screen, color.Black, 2, 500, false, true, true, bone, frameMap[key])
 	}
 
 }
@@ -257,7 +233,7 @@ func main() {
 
 	game := Game{}
 
-	game.InitAnimator("./thetaconfig.yaml", 10, true, "../bones/boneconfig1.yaml", "./testanimationconfig.yaml")
+	game.InitAnimator("./thetaconfig.yaml", 10, true, "../bones/boneconfig1.yaml", "./bounce.yaml")
 
 	ebiten.SetTPS(1)
 

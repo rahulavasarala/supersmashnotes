@@ -35,8 +35,6 @@ type Character interface {
 	GetType() string
 	GetVel() (float64, float64)
 	SetVel(xv float64, yv float64)
-	GetHurtbox() []HurtBox
-	GetHitbox() []HitBox
 	GetEcb() (float64, float64)
 	GetId() string
 	//add the logic for set hitstun later, for now just role with this
@@ -51,8 +49,6 @@ type StateCharacter interface {
 	GetType() string
 	GetVel() (float64, float64)
 	SetVel(xv float64, yv float64)
-	GetHurtbox() []HurtBox
-	GetHitbox() []HitBox
 	GetEcb() (float64, float64)
 	GetId() string
 	GetState() string
@@ -62,20 +58,6 @@ type StateCharacter interface {
 	GetGrounded() bool
 	SetGrounded(val bool)
 	//add the logic for set hitstun later, for now just role with this
-}
-
-type HurtBox struct {
-	xpos   float64
-	ypos   float64
-	width  int
-	height int
-}
-
-type HitBox struct {
-	xpos   float64
-	ypos   float64
-	width  int
-	height int
 }
 
 type Thing interface {

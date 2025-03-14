@@ -37,7 +37,7 @@ func (g *Game) Update() error {
 
 	g.currFrame++
 
-	if g.currFrame > 20 {
+	if g.currFrame > 100 {
 		g.currFrame = 0
 	}
 
@@ -48,11 +48,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.White)
 
 	frameMap := g.wireframe.FindGlobalBoneFrames(g.wireframe.GetBone(0))
+	graphics.Draw(screen, color.RGBA{0, 255, 0, 70}, 0, 0, 500, 154, 500, false)
 
 	for key := range frameMap {
 		bone := g.wireframe.GetBone(key)
 
-		graphics.DrawBone(screen, color.Black, 2, 500, false, true, bone, frameMap[key])
+		graphics.DrawBone(screen, color.Black, 2, 500, false, true, g.debugMode, bone, frameMap[key])
 	}
 
 }
@@ -67,7 +68,7 @@ func main() {
 
 	game := Game{}
 
-	game.InitPlayer(true, "../bones/boneconfig1.yaml", "../animationtool/testanimationconfig.yaml")
+	game.InitPlayer(true, "../bones/boneconfig1.yaml", "../animationtool/flipkick.yaml")
 
 	ebiten.SetTPS(60)
 

@@ -89,14 +89,6 @@ func (s *StateDude) GetBoundingBox() (float64, float64) {
 	return s.ecbwidth, s.ecbheight
 }
 
-func (s *StateDude) GetHitbox() []HitBox {
-	return nil
-}
-
-func (s *StateDude) GetHurtbox() []HurtBox {
-	return nil
-}
-
 func (s *StateDude) GetPos() (float64, float64) {
 
 	return s.xpos, s.ypos

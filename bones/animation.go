@@ -9,6 +9,7 @@ import (
 )
 
 type Animation struct {
+	length          int
 	xOffset         *properties.DoubleProperty
 	yOffset         *properties.DoubleProperty
 	baseOrientation *properties.DoubleProperty
@@ -23,6 +24,7 @@ type JointProperty struct {
 }
 
 type AnimationConfig struct {
+	Length          int                     `yaml:"length"`
 	XOffset         []properties.RangeValue `yaml:"xoffset"`
 	YOffset         []properties.RangeValue `yaml:"yoffset"`
 	BaseOrientation []properties.RangeValue `yaml:"baseorientation"`
@@ -77,6 +79,7 @@ func (s *Animation) InitAnimation(animationConfig string) {
 	s.xOffset = xoffset
 	s.yOffset = yoffset
 	s.baseOrientation = orientation
+	s.length = config.Length
 
 	s.jointPropertyList = []JointProperty{}
 
@@ -90,6 +93,10 @@ func (s *Animation) InitAnimation(animationConfig string) {
 		s.jointPropertyList = append(s.jointPropertyList, jP)
 	}
 
+}
+
+func (s *Animation) Length() int {
+	return s.length
 }
 
 //animation is a all encompassing data structure that allows you to read animations joint values

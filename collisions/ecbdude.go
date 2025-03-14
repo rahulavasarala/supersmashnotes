@@ -36,14 +36,6 @@ func (s *EcbDude) GetBoundingBox() (float64, float64) {
 	return s.ecbwidth, s.ecbheight
 }
 
-func (s *EcbDude) GetHitbox() []HitBox {
-	return nil
-}
-
-func (s *EcbDude) GetHurtbox() []HurtBox {
-	return nil
-}
-
 func (s *EcbDude) GetPos() (float64, float64) {
 
 	return s.xpos, s.ypos

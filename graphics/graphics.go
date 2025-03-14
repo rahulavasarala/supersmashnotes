@@ -3,6 +3,7 @@ package graphics
 import (
 	"fmt"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -10,6 +11,8 @@ import (
 	"github.com/rahulavasarala/supersmashnotes/bones"
 	"gonum.org/v1/gonum/mat"
 )
+
+var hurtbox_yellow = color.RGBA{255, 255, 0, 70}
 
 func Draw(screen *ebiten.Image, color color.Color, xpos float64, ypos float64, width float64, height float64, gameHeight int, antialias bool) {
 	vector.DrawFilledRect(screen, float32(xpos), float32(gameHeight)-float32(ypos), float32(width), -1*float32(height), color, antialias)
@@ -47,7 +50,22 @@ func DrawEcb(screen *ebiten.Image, color color.Color, xpos float64, ypos float64
 	DrawLine(screen, color, x2, ypos, xpos, y2, thickness, gameHeight, antialias)
 }
 
-func DrawBone(screen *ebiten.Image, color color.Color, thickness float64, gameHeight int, antialias bool, debugMode bool, bone *bones.Bone, frame *mat.Dense) {
+func DrawRotatedRectangle(screen *ebiten.Image, color color.Color, x float64, y float64, width float64, height float64, rotate float64, gameHeight int, antialias bool) {
+	rect := ebiten.NewImage(int(width), int(height))
+	rect.Fill(color)
+
+	geom := ebiten.GeoM{}
+	geom.Translate(-1*width/2, -1*height/2)
+	geom.Rotate(-1 * rotate)
+
+	geom.Translate(x, float64(gameHeight)-y)
+
+	screen.DrawImage(rect, &ebiten.DrawImageOptions{
+		GeoM: geom,
+	})
+}
+
+func DrawBone(screen *ebiten.Image, color color.Color, thickness float64, gameHeight int, antialias bool, drawHurtBox bool, debugMode bool, bone *bones.Bone, frame *mat.Dense) {
 	//so you use the frame which is ove
 
 	width := bone.GetWidth()
@@ -66,6 +84,14 @@ func DrawBone(screen *ebiten.Image, color color.Color, thickness float64, gameHe
 	x1, y1 := xbase+xv*width/2, ybase+yv*width/2
 
 	x2, y2 := xbase-xv*width/2, ybase-yv*width/2
+
+	if drawHurtBox {
+		hurtbox := bone.GetHurtBox()
+		r_angle := math.Atan2(yv, xv)
+
+		//Draw the hurtbox over here: should be quick
+		DrawRotatedRectangle(screen, hurtbox_yellow, xbase, ybase, hurtbox.GetWidth(), hurtbox.GetHeight(), r_angle, gameHeight, antialias)
+	}
 
 	DrawLine(screen, color, x1, y1, x2, y2, thickness, gameHeight, antialias)
 
